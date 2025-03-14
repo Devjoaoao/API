@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
-const User = mongoose.model('User', {
-    name: String,
-    email: String,
-    password: String,
-    approved: { type: Boolean, default: false }, // Novo campo para aprovação do usuário
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
 });
 
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
