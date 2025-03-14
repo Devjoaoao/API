@@ -5,16 +5,13 @@ document.querySelector('form').addEventListener('submit', async (event) => {
     const email = document.querySelector('input[name="email"]').value;
     const password = document.querySelector('input[name="password"]').value;
 
-    if (!name || !email || !password) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-    }
+    const userData = { name, email, password };
 
     try {
         const response = await fetch('https://macademy-api-nj20.onrender.com/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify(userData)
         });
 
         const result = await response.json();
@@ -22,7 +19,7 @@ document.querySelector('form').addEventListener('submit', async (event) => {
 
         if (response.ok) {
             alert("Usuário registrado com sucesso!");
-            window.location.href = "/login.html"; // Redireciona para a página de login
+            window.location.href = "/login.html";
         } else {
             alert(result.message || "Erro ao registrar usuário.");
         }
