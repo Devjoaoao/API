@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Money Academy</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 900px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .left {
+            background: linear-gradient(135deg, #e85d04, #fb8500);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
+        .left h2 {
+            margin-bottom: 10px;
+        }
+        .left p {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .left button {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .left button:hover {
+            background: white;
+            color: #e85d04;
+        }
+        .right {
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .input-group {
+            width: 100%;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 35px;
+            cursor: pointer;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #e85d04, #fb8500);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: linear-gradient(135deg, #fb8500, #e85d04);
+        }
+        .link {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .link a {
+            color: #e85d04;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link a p {
+            text-align: center;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .left {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <h2>Estude sem sair de casa!</h2>
+            <p>Milhares de pessoas já estão aqui. Faça login e descubra um mundo de possibilidades.</p>
+            <a href="registrar.html"><button>Criar conta</button></a>
+        </div>
+        <div class="right">
+            <div class="logo">
+                <a href="index.html"><img src="favicon.png" alt="Logo"/></a>
+            </div>
+            <div class="input-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="Digite seu e-mail" required />
+            </div>
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha" required autocomplete="off" />
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+            </div>
+            <p id="error-message" class="error-message"></p>
+            <button class="button" id="login-btn">ENTRAR</button>
+            <div class="link">
+                <a href="password.html"><p>Esqueceu a senha?</p></a>
+                <p>Não possui conta? <a href="registrar.html">Crie uma agora!</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       // Mostrar ou ocultar senha
+       function togglePassword() {
+            let passwordField = document.getElementById("password");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+            } else {
+                passwordField.type = "password";
+            }
+        }
+
+        // Evento para fazer login
+        document.getElementById("login-btn").addEventListener("click", async function (event) {
+            event.preventDefault();
+
+            let email = document.getElementById("email").value.trim();
+            let password = document.getElementById("password").value.trim();
+            let errorMessage = document.getElementById("error-message");
+
+            if (!email || !password) {
+                errorMessage.textContent = "Preencha todos os campos!";
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            try {
+                let response = await fetch("https://macademy-api.onrender.com/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+
+                let data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem("token", data.token);
+                    alert("Login bem-sucedido!");
+                    window.location.href = "dashboard.html";
+                } else {
+                    errorMessage.textContent = data.msg || "Credenciais inválidas!";
+                    errorMessage.style.display = "block";
+                }
+            } catch (error) {
+                console.error("Erro ao conectar com a API", error);
+                errorMessage.textContent = "Erro de conexão. Tente novamente!";
+                errorMessage.style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>
