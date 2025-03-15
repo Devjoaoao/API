@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-ao">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="loregist.css">
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+    <title>Cadastro - Money Academy</title>
+    <style>
+        /* Seus estilos CSS aqui */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <h2>Tomou a decisão certa!</h2>
+            <p>Bem-vindo ao seu novo mundo de aprendizado e crescimento. O registo é simples e agradável.</p>
+            <a href="login.html"><button>Iniciar sessão</button></a>
+        </div>
+        <div class="right">
+            <div class="logo">
+                <a href="index.html"><img src="favicon.png" alt="Logo"></a>
+            </div>
+            <div class="input-group">
+                <label for="name">Nome completo</label>
+                <input type="text" id="name" placeholder="Digite seu nome completo">
+            </div>
+            <div class="input-group">
+                <label for="email">Endereço de e-mail</label>
+                <input type="email" id="email" placeholder="Digite seu e-mail">
+            </div>
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha">
+            </div>
+            <div class="input-group">
+                <label for="confirmpassword">Confirmar Senha</label>
+                <input type="password" id="confirmpassword" placeholder="Confirme sua senha">
+            </div>
+            <button class="button" id="register-btn">Cadastrar</button>
+            <div class="link">
+                <p>Já possui conta? <a href="login.html">Faça login!</a></p>
+            </div>
+            <!-- Adicione esta div para exibir mensagens -->
+            <div id="message" style="margin-top: 10px; color: red;"></div>
+        </div>
+    </div>
+
+    <div class="card" id="approval-card">
+        <img src="gggg.jpg" alt="Foto do Criador">
+        <h2>Cadastro em Verificação!!</h2>
+        <p>Seu cadastro está em análise, faça o pagamento do valor do acesso de 10.500Kz nos dados bancários abaixo, e contate imediatamente o suporte com o comprovante do pagamento para ser liberado o teu acesso como um afiliado.</p>
+        <p><strong>GILBERTO CATANGUA QUISSENGUI</strong></p>
+        <p><strong>CONTA: 189492810 10 001</strong></p>
+        <p><strong>IBAN: 0040.0000.8949.2810.1012.3</strong></p>
+        <p><strong>EXPRESS: 929060265</strong></p>
+        <a href="https://wa.me/244954099287">Clique aqui para falar com o suporte</a>
+        <button onclick="document.getElementById('approval-card').style.display='none'">Fechar</button>
+    </div>
+
+    <script>
+        document.getElementById('register-btn').addEventListener('click', async () => {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmpassword = document.getElementById('confirmpassword').value;
+
+            // Verifica se as senhas coincidem
+            if (password !== confirmpassword) {
+                document.getElementById('message').innerText = 'As senhas não conferem!';
+                return;
+            }
+
+            // Envia os dados para a API
+            try {
+                const response = await fetch('https://macademy-api.onrender.com/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password, confirmpassword }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Exibe a mensagem de sucesso
+                    document.getElementById('message').innerText = data.msg;
+                    // Exibe o card de aprovação
+                    document.getElementById('approval-card').style.display = 'block';
+                } else {
+                    // Exibe a mensagem de erro retornada pela API
+                    document.getElementById('message').innerText = data.msg;
+                }
+            } catch (error) {
+                console.error('Erro ao registrar:', error);
+                document.getElementById('message').innerText = 'Erro ao conectar com o servidor. Tente novamente mais tarde.';
+            }
+        });
+    </script>
+</body>
+</html>
