@@ -76,27 +76,29 @@ app.post('/auth/approve/:id', async (req, res) => {
 // Rota de Login corrigida
 app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
+
     try {
-      const user = await User.findOne({ email });
-  
-      if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
-  
-      console.log("Usuário encontrado:", user); // DEBUG: Verifique os dados no terminal
-  
-      if (user.approved !== true) {
-          return res.status(403).json({ message: 'Usuário ainda não aprovado!' });
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(400).json({ message: 'Senha incorreta' });
-  
-      const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '1h' });
-  
-      res.status(200).json({ message: 'Login bem-sucedido!', token });
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
+
+        console.log("Usuário encontrado:", user); // DEBUG: Verifique no terminal do Render
+
+        if (user.approved !== true) {
+            return res.status(403).json({ message: 'Usuário ainda não aprovado!' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: 'Senha incorreta' });
+
+        const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '1h' });
+
+        res.status(200).json({ message: 'Login bem-sucedido!', token });
     } catch (error) {
-      res.status(500).json({ message: 'Erro no servidor', error });
+        res.status(500).json({ message: 'Erro no servidor', error });
     }
-  });
+});
+
   
 // Rota Protegida para Dashboard
 app.get('/dashboard', async (req, res) => {
