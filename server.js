@@ -78,26 +78,39 @@ app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ email });
+        // 🔥 Aqui estamos garantindo que o campo "approved" será retornado
+        const user = await User.findOne({ email }).select("+approved");
 
-        if (!user) return res.status(400).json({ message: 'Usuário não encontrado' });
-
-        console.log("Usuário encontrado:", user); // DEBUG: Verifique no terminal do Render
-
-        if (user.approved !== true) {
-            return res.status(403).json({ message: 'Usuário ainda não aprovado!' });
+        if (!user) {
+            return res.status(400).json({ message: 'Usuário não encontrado' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: 'Senha incorreta' });
+        console.log("DEBUG - Usuário encontrado:", user); // Verifica se o usuário está sendo encontrado
+        console.log("DEBUG - Approved:", user.approved); // Mostra no log se o campo approved está correto
 
+        // 🔥 Verifica se o usuário está aprovado
+        if (user.approved !== true) {  
+            return res.status(403).json({ message: 'Usuário ainda não foi aprovado!' });
+        }
+
+        // Verifica se a senha está correta
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Senha incorreta' });
+        }
+
+        // Gera o token de autenticação
         const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '1h' });
 
         res.status(200).json({ message: 'Login bem-sucedido!', token });
+
     } catch (error) {
+        console.error("Erro no login:", error);
         res.status(500).json({ message: 'Erro no servidor', error });
     }
 });
+
+
 
   
 // Rota Protegida para Dashboard
