@@ -20,27 +20,40 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('🔥 Conectado ao MongoDB'))
   .catch(err => console.error('❌ Erro ao conectar:', err));
 
+  app.get('/db-test', async (req, res) => {
+    try {
+        const dbName = mongoose.connection.name;
+        res.json({ message: "✅ Conectado ao MongoDB!", database: dbName });
+    } catch (error) {
+        res.status(500).json({ error: "❌ Erro ao conectar ao banco!" });
+    }
+});
 
-// Rota de Registro
-app.post('/auth//register', async (req, res) => {
-  const { name, email, password } = req.body;
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Usuário já existe' });
+// Rota de Registro (corrigida)
+app.post('/auth/register', async (req, res) => {
+    const { name, email, password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword,
-      approved: false // Começa como não aprovado
-    });
+    try {
+        // Normaliza o e-mail (remove espaços e converte para minúsculas)
+        const normalizedEmail = email.trim().toLowerCase();
+        
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        if (existingUser) return res.status(400).json({ message: 'Usuário já existe' });
 
-    await newUser.save();
-    res.status(201).json({ message: 'Usuário registrado! Aguarde aprovação do administrador.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Erro no servidor', error });
-  }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            name,
+            email: normalizedEmail,  // Armazena o e-mail formatado
+            password: hashedPassword,
+            approved: false
+        });
+
+        await newUser.save();
+        res.status(201).json({ message: 'Usuário registrado! Aguarde aprovação do administrador.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro no servidor', error });
+    }
 });
 
 // Rota de Aprovação de Usuário
@@ -102,6 +115,22 @@ app.get('/dashboard', async (req, res) => {
     res.status(500).json({ message: 'Erro ao acessar o dashboard', error });
   }
 });
+
+const express = require('express');
+const mongoose = require('mongoose');
+const router = express.Router();
+
+router.get('/db-test', async (req, res) => {
+    try {
+        await mongoose.connection.db.admin().ping();
+        res.json({ message: "Conectado ao MongoDB no Render!", database: mongoose.connection.name });
+    } catch (error) {
+        res.status(500).json({ error: "Erro ao conectar ao banco de dados no Render!" });
+    }
+});
+
+module.exports = router;
+
 
 // Iniciar Servidor
 const PORT = 5000;
